@@ -1,0 +1,21 @@
+# Only the database runs in Docker. The app runs on your machine.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sites_cms
+      POSTGRES_PASSWORD: sites_cms
+      POSTGRES_DB: sites_cms
+    ports:
+      - "127.0.0.1:${DB_PORT:-5434}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sites_cms -d sites_cms"]
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  db-data:
