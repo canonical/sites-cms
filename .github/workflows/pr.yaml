@@ -1,0 +1,124 @@
+name: PR checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DATABASE_URL: postgresql://sites_cms:sites_cms@localhost:5432/sites_cms
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+      - run: uv sync --locked
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sites_cms
+          POSTGRES_PASSWORD: sites_cms
+          POSTGRES_DB: sites_cms
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sites_cms"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+      - run: uv sync --locked
+      # Creates the test database from nothing, so every migration is
+      # applied from empty on each run.
+      - run: uv run pytest -q --tb=short --cov --cov-report=term-missing
+      - name: Django deployment checks on production settings
+        env:
+          DJANGO_SETTINGS_MODULE: sites_cms.settings.production
+          DJANGO_SECRET_KEY: check-only-not-a-real-key-0123456789-abcdefghijklmnop
+          DJANGO_ALLOWED_HOSTS: cms.example.com
+          DJANGO_BASE_URL: https://cms.example.com
+          POSTGRESQL_DB_CONNECT_STRING: ${{ env.DATABASE_URL }}
+        run: >-
+          uv run python sites_cms/manage.py check --deploy
+          --fail-level WARNING
+
+  migrations:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sites_cms
+          POSTGRES_PASSWORD: sites_cms
+          POSTGRES_DB: sites_cms
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sites_cms"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+      - run: uv sync --locked
+      - run: uv run python sites_cms/manage.py makemigrations --check --dry-run
+
+  lockfile:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+      - name: uv.lock matches pyproject.toml
+        run: uv lock --check
+      - name: requirements.txt matches uv.lock
+        run: |
+          uv export --no-dev --no-emit-project --format requirements-txt \
+            -o requirements.txt
+          git diff --exit-code -- requirements.txt
+
+  audit:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1db35dd8eee11c5894872e0b383ae6c406cf738d # v10.4.0
+      - run: uv sync --locked
+      - run: >-
+          uv run pip-audit -r requirements.txt --require-hashes
+          --disable-pip
