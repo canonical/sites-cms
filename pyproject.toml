@@ -1,0 +1,64 @@
+[project]
+name = "sites-cms"
+version = "0.1.0"
+description = "Canonical's content management system, built on Wagtail"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "wagtail>=8.1,<8.2",
+    "Django>=5.2,<6.0",
+    "psycopg[binary]>=3.2,<4",
+    "dj-database-url>=3.1,<4",
+    "whitenoise>=6.12,<7",
+    "gunicorn>=27,<28",
+    "sentry-sdk>=3,<4",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9,<10",
+    "pytest-django>=4.14,<5",
+    "pytest-cov>=7,<8",
+    "ruff>=0.17,<0.18",
+    "pip-audit>=2.9",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "sites_cms.settings.test"
+pythonpath = ["sites_cms"]
+testpaths = ["sites_cms"]
+python_files = ["test_*.py"]
+addopts = "--strict-markers"
+# Our own code must not use anything Django or Wagtail has deprecated.
+filterwarnings = [
+    "error::DeprecationWarning:sites_cms",
+    "error::DeprecationWarning:accounts",
+    "error::DeprecationWarning:assets",
+    "error::DeprecationWarning:core",
+    "error::PendingDeprecationWarning:sites_cms",
+    "error::PendingDeprecationWarning:accounts",
+    "error::PendingDeprecationWarning:assets",
+    "error::PendingDeprecationWarning:core",
+]
+
+[tool.coverage.run]
+source = ["sites_cms"]
+omit = ["*/migrations/*", "*/tests/*"]
+
+[tool.ruff]
+line-length = 79
+target-version = "py312"
+src = ["sites_cms"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+
+[tool.ruff.lint.per-file-ignores]
+"sites_cms/sites_cms/settings/*.py" = ["F403", "F405"]
+"*/migrations/*" = ["E501"]
+
+[tool.ruff.format]
+exclude = ["*/migrations/*"]
