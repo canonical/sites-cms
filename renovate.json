@@ -1,0 +1,21 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests"],
+  "schedule": ["before 7am on monday"],
+  "timezone": "Europe/London",
+  "lockFileMaintenance": { "enabled": true },
+  "packageRules": [
+    {
+      "description": "One weekly PR for routine updates",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+      "groupName": "weekly updates"
+    },
+    {
+      "description": "Wagtail and Django feature releases are planned, not automatic",
+      "matchPackageNames": ["wagtail", "Django"],
+      "matchUpdateTypes": ["major", "minor"],
+      "groupName": null,
+      "dependencyDashboardApproval": true
+    }
+  ]
+}
