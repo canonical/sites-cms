@@ -181,9 +181,10 @@ Charmcraft and runs the rock above. You need the `charmcraft` snap, and Juju
 with a Kubernetes cloud (MicroK8s with the `registry` add-on works) to try
 it.
 
+Run these from the repository root:
+
 ```bash
-cd charm
-charmcraft pack               # writes sites-cms_amd64.charm
+(cd charm && charmcraft pack) # writes charm/sites-cms_amd64.charm
 ```
 
 `charmcraft pack` downloads the charm libraries into `charm/lib/`. They are

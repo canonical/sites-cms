@@ -31,9 +31,10 @@ The charm has no action for this. It is done in the Wagtail admin:
 - **Someone else's password (admins only):** Settings, then Users, then
   the user.
 
-"Forgot password" on the sign-in page sends a reset email. It works only
-when a mail server is configured (`SMTP_HOST`). Without one, the email is
-logged and dropped.
+"Forgot password" on the sign-in page does not work yet. The charm has no
+SMTP integration, so the app has no mail server and the reset email is
+logged and dropped. Until one is added, an admin resets the password under
+Settings, then Users.
 
 ## Every admin is locked out
 
