@@ -1,0 +1,25 @@
+# The workload image is the rock built by ../rockcraft.yaml.
+
+name: sites-cms
+title: Sites CMS
+type: charm
+base: ubuntu@24.04
+
+platforms:
+  amd64:
+
+summary: Canonical's content management system, built on Wagtail.
+
+description: |
+  Editors use the Wagtail admin; websites read content through an API.
+  The charm runs the sites-cms rock with Gunicorn, applies database
+  migrations on start and needs a PostgreSQL integration to work.
+
+extensions:
+  - django-framework
+
+requires:
+  postgresql:
+    interface: postgresql_client
+    optional: false
+    limit: 1

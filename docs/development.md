@@ -148,6 +148,71 @@ uv run pytest -k "status_check" -q
 switching branches with different migrations, run
 `uv run pytest --create-db` once.
 
+### Build the production image
+
+The production image is a rock, built by `rockcraft.yaml` at the
+repository root with the `django-framework` extension. You need the
+`rockcraft` snap and LXD.
+
+```bash
+rockcraft pack                # writes sites-cms_<version>_amd64.rock
+rockcraft.skopeo --insecure-policy copy \
+  oci-archive:sites-cms_0.1.0_amd64.rock docker-daemon:sites-cms:0.1.0
+```
+
+In the image:
+
+- Gunicorn serves the app on port 8000 with the production settings.
+- The application code is in `/django/app`.
+- Static files are collected at build time into `/django/static-collected`
+  and served by WhiteNoise.
+- `DJANGO_SETTINGS_MODULE` defaults to the production settings, so
+  `python3 manage.py migrate` in the container needs only the production
+  environment variables.
+
+Run it with the production variables from the table above, for example
+`docker run -p 8000:8000 -e DJANGO_SECRET_KEY=... sites-cms:0.1.0`.
+`rockcraft clean` removes the build container.
+
+### Build and try the charm
+
+The charm is in `charm/`. It uses the `django-framework` extension of
+Charmcraft and runs the rock above. You need the `charmcraft` snap, and Juju
+with a Kubernetes cloud (MicroK8s with the `registry` add-on works) to try
+it.
+
+```bash
+cd charm
+charmcraft pack               # writes sites-cms_amd64.charm
+```
+
+`charmcraft pack` downloads the charm libraries into `charm/lib/`. They are
+not committed.
+
+To try it, push the rock to the MicroK8s registry and deploy:
+
+```bash
+rockcraft.skopeo --insecure-policy copy --dest-tls-verify=false \
+  oci-archive:sites-cms_0.1.0_amd64.rock \
+  docker://localhost:32000/sites-cms:0.1.0
+juju add-model sites-cms
+juju deploy postgresql-k8s --channel 14/stable --trust
+juju deploy ./charm/sites-cms_amd64.charm \
+  --resource django-app-image=localhost:32000/sites-cms:0.1.0
+juju integrate sites-cms postgresql-k8s
+juju run sites-cms/0 create-superuser username=admin email=admin@example.com
+```
+
+The charm stays blocked until PostgreSQL is integrated. It sets
+`DJANGO_SECRET_KEY`, `DJANGO_ALLOWED_HOSTS`, `DJANGO_BASE_URL` and
+`POSTGRESQL_DB_CONNECT_STRING`, and runs `manage.py migrate` on start. Add
+host names with `juju config sites-cms django-allowed-hosts=<host>`. Admin
+login needs HTTPS, so sign in through an ingress with TLS. The charm creates
+no default admin: `create-superuser` returns a random password. See
+[the admin accounts runbook](runbooks/admin-accounts.md) for changing
+passwords.
+`juju destroy-model sites-cms --destroy-storage` removes it all.
+
 ## What CI checks
 
 Every pull request runs five jobs: `lint`, `test`, `migrations`, `lockfile`

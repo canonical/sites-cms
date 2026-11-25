@@ -6,6 +6,10 @@ The CMS is not yet deployed for editors. Developers running it on their own
 machine sign in at http://localhost:8000/admin/ with the username `admin`
 and the password `admin`.
 
+On a test deployment, before company sign-in is switched on, an
+administrator creates your account and gives you a random password. Change
+it after your first sign-in: open Account, then the Password section.
+
 ## When it is deployed
 
 You will sign in with your Canonical account, the same one you use for

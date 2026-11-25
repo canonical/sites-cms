@@ -19,6 +19,7 @@ sites_cms/
   accounts/    the user model
   assets/      the image and document models
   core/        health check, logging, middleware, local commands
+charm/         the Juju charm (Charmcraft django-framework extension)
 docs/          development.md, decisions/, runbooks/, user/
 ```
 
