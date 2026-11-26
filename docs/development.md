@@ -214,6 +214,30 @@ no default admin: `create-superuser` returns a random password. See
 passwords.
 `juju destroy-model sites-cms --destroy-storage` removes it all.
 
+### Test the charm
+
+The charm adds no code to paas-charm, so its tests cover only what joins
+it to this project. Run them from `charm/` with `uvx tox`. Both need
+`charmcraft fetch-libs` first.
+
+- **Unit** (`uvx tox -e unit`, seconds): checks that PostgreSQL is the only
+  required integration, and loads the production settings with the
+  environment the charm generates. A renamed or new required setting fails
+  here. Needs the `charmcraft` and `uv` commands.
+- **Integration** (about 4 minutes): deploys the packed charm and the rock
+  into a temporary model, with PostgreSQL. Checks blocked and active
+  status, the health check, both actions, `django-allowed-hosts` and
+  removing the database. Push the rock as above, then:
+
+```bash
+uvx tox -e integration -- --controller microk8s-controller \
+  --charm-file ./sites-cms_amd64.charm \
+  --rock-image localhost:32000/sites-cms:0.1.0
+```
+
+Always pass `--controller`. Without it the model is added to whichever
+controller is current. `--keep-models` keeps the model for debugging.
+
 ## What CI checks
 
 Every pull request runs five jobs: `lint`, `test`, `migrations`, `lockfile`
