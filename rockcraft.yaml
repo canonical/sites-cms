@@ -1,0 +1,51 @@
+name: sites-cms
+base: ubuntu@24.04
+version: "0.1.0"
+summary: Canonical's content management system, built on Wagtail
+description: |
+  Editors use the Wagtail admin; websites read content through an API.
+  Built with the django-framework extension for a 12-factor Django charm.
+platforms:
+  amd64:
+
+extensions:
+  - django-framework
+
+# The charm runs `manage.py migrate` in the container, and manage.py would
+# otherwise default to the development settings.
+environment:
+  DJANGO_SETTINGS_MODULE: sites_cms.settings.production
+
+parts:
+  django-framework/dependencies:
+    # Without pyproject.toml the plugin does not `pip install .` the
+    # project, which is not a package, into site-packages.
+    override-build: |
+      rm -f pyproject.toml
+      craftctl default
+
+  # WhiteNoise serves the collected files and needs them in the image.
+  static-files:
+    plugin: nil
+    after:
+      - django-framework/dependencies
+      - django-framework/install-app
+    build-environment:
+      - DJANGO_SETTINGS_MODULE: sites_cms.settings.production
+      - DJANGO_SECRET_KEY: build-only-not-a-secret
+      - DJANGO_ALLOWED_HOSTS: localhost
+      - DJANGO_BASE_URL: http://localhost
+      - DATABASE_URL: postgresql://build:build@localhost/build
+    override-build: |
+      cp -r "$CRAFT_STAGE/django" "$CRAFT_PART_BUILD/"
+      PYTHONPATH="$CRAFT_STAGE/lib/python3.12/site-packages" \
+        python3.12 "$CRAFT_PART_BUILD/django/app/manage.py" \
+        collectstatic --noinput
+      mkdir -p "$CRAFT_PART_INSTALL/django"
+      mv "$CRAFT_PART_BUILD/django/static-collected" \
+        "$CRAFT_PART_INSTALL/django/"
+    # The app runs as _daemon_ and writes uploads to /django/media.
+    permissions:
+      - path: django
+        owner: 584792
+        group: 584792

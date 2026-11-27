@@ -8,4 +8,5 @@ __pycache__/
 htmlcov/
 media/
 static-collected/
+*.rock
 .DS_Store
