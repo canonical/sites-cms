@@ -28,7 +28,7 @@ again.
 |---|---|
 | `make setup` | Everything needed after a fresh clone |
 | `make run` | Starts the server on port 8000. It restarts itself when you save a file |
-| `make seed` | Loads sample content. Does nothing until the first content models exist |
+| `make seed` | Loads sample content: a blog index, terms, authors and posts. Safe to run again |
 | `make test` | Runs the tests |
 | `make lint` | Checks code style |
 | `make format` | Fixes code style |
@@ -42,6 +42,20 @@ migrations. If Django says migrations are pending, run
 `uv run python sites_cms/manage.py migrate`.
 
 Any other Django command: `uv run python sites_cms/manage.py <command>`.
+
+## Apps
+
+The Django apps live in `sites_cms/`.
+
+| App | Holds |
+|---|---|
+| `accounts` | The user model |
+| `assets` | The image and document models |
+| `blog` | Blog index and post pages, categories, groups, tags and authors, the "Blog posts" admin listing |
+| `core` | Health check, logging, middleware, local commands |
+
+The blog index is not created by a migration. `make seed` creates it, through
+`blog.models.get_blog_index()`, and so will the WordPress importer.
 
 ## Versions
 

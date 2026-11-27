@@ -37,10 +37,12 @@ filterwarnings = [
     "error::DeprecationWarning:sites_cms",
     "error::DeprecationWarning:accounts",
     "error::DeprecationWarning:assets",
+    "error::DeprecationWarning:blog",
     "error::DeprecationWarning:core",
     "error::PendingDeprecationWarning:sites_cms",
     "error::PendingDeprecationWarning:accounts",
     "error::PendingDeprecationWarning:assets",
+    "error::PendingDeprecationWarning:blog",
     "error::PendingDeprecationWarning:core",
 ]
 

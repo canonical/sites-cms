@@ -37,10 +37,26 @@ def test_create_local_admin_is_safe_to_run_twice(settings):
     assert admin.check_password("admin")
 
 
-def test_seed_runs():
-    out = StringIO()
-    call_command("seed", stdout=out)
-    assert out.getvalue().strip()
+@pytest.mark.django_db
+def test_seed_is_safe_to_run_twice_and_links_the_local_admin(settings):
+    from blog.models import Author, BlogPage, Category, Group, Tag
+
+    settings.DEBUG = True
+    call_command("create_local_admin", stdout=StringIO())
+    models = [BlogPage, Category, Group, Tag, Author]
+
+    call_command("seed", stdout=StringIO())
+    counts = [model.objects.count() for model in models]
+    call_command("seed", stdout=StringIO())
+
+    assert [model.objects.count() for model in models] == counts
+    assert counts == [6, 3, 4, 10, 3]
+    admin = get_user_model().objects.get(username="admin")
+    assert Author.objects.get(slug="local-admin").user == admin
+    assert BlogPage.objects.live().count() == 4
+    scheduled = BlogPage.objects.get(title="Juju 4.0 is coming")
+    assert scheduled.get_latest_revision().approved_go_live_at
+    assert Group.objects.get(slug="kubeflow").parent.slug == "ai"
 
 
 def test_json_log_line_carries_the_request_fields():

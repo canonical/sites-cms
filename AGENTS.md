@@ -18,6 +18,7 @@ sites_cms/
   sites_cms/   settings/{base,dev,test,production}.py, env.py, urls.py
   accounts/    the user model
   assets/      the image and document models
+  blog/        blog posts, categories, groups, tags and authors
   core/        health check, logging, middleware, local commands
 docs/          development.md, decisions/, runbooks/, user/
 ```
@@ -72,6 +73,6 @@ is done.
 | Kind of decision | Where |
 |---|---|
 | A project-wide choice or rule (a tool, a version, a rule like the ones above) | `docs/decisions/`, one short file |
-| How a feature behaves, and why | With the feature's spec. OpenSpec is proposed for this and not yet set up; until it is, put it in the pull request description |
+| How a feature behaves, and why | With the feature's OpenSpec change in `openspec/changes/`, then in `openspec/specs/` once archived. See [0003](docs/decisions/0003-use-openspec-for-feature-specs.md) |
 
 Record a decision in one place only.

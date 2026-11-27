@@ -23,7 +23,9 @@ COMMIT_ID = env_str("COMMIT_ID", "unknown")
 INSTALLED_APPS = [
     "accounts",
     "assets",
+    "blog",
     "core",
+    "wagtail.contrib.table_block",
     "wagtail.embeds",
     "wagtail.sites",
     "wagtail.users",
