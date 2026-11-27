@@ -197,7 +197,7 @@ rockcraft.skopeo --insecure-policy copy --dest-tls-verify=false \
   oci-archive:sites-cms_0.1.0_amd64.rock \
   docker://localhost:32000/sites-cms:0.1.0
 juju add-model sites-cms
-juju deploy postgresql-k8s --channel 14/stable --trust
+juju deploy postgresql-k8s --channel 16/stable --trust
 juju deploy ./charm/sites-cms_amd64.charm \
   --resource django-app-image=localhost:32000/sites-cms:0.1.0
 juju integrate sites-cms postgresql-k8s

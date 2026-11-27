@@ -57,7 +57,7 @@ def test_active_with_database(juju: jubilant.Juju):
     assert: the charm is active and the health check, which queries the
         database, and the admin sign-in page both answer 200.
     """
-    juju.deploy(POSTGRESQL, channel="14/stable", trust=True)
+    juju.deploy(POSTGRESQL, channel="16/stable", trust=True)
     juju.integrate(APP, POSTGRESQL)
 
     juju.wait(lambda s: jubilant.all_active(s, APP, POSTGRESQL))
