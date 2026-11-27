@@ -18,6 +18,7 @@ sites_cms/
   sites_cms/   settings/{base,dev,test,production}.py, env.py, urls.py
   accounts/    the user model
   assets/      the image and document models
+  blog/        blog posts, categories, groups, tags and authors
   core/        health check, logging, middleware, local commands
 docs/          development.md, decisions/, runbooks/, user/
 ```

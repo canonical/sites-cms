@@ -43,6 +43,20 @@ migrations. If Django says migrations are pending, run
 
 Any other Django command: `uv run python sites_cms/manage.py <command>`.
 
+## Apps
+
+The Django apps live in `sites_cms/`.
+
+| App | Holds |
+|---|---|
+| `accounts` | The user model |
+| `assets` | The image and document models |
+| `blog` | Blog index and post pages, categories, groups, tags and authors, the "Blog posts" admin listing |
+| `core` | Health check, logging, middleware, local commands |
+
+The blog index is not created by a migration. `make seed` creates it, through
+`blog.models.get_blog_index()`, and so will the WordPress importer.
+
 ## Versions
 
 | | Version | Notes |
