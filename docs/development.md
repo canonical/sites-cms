@@ -28,7 +28,7 @@ again.
 |---|---|
 | `make setup` | Everything needed after a fresh clone |
 | `make run` | Starts the server on port 8000. It restarts itself when you save a file |
-| `make seed` | Loads sample content. Does nothing until the first content models exist |
+| `make seed` | Loads sample content: a blog index, terms, authors and posts. Safe to run again |
 | `make test` | Runs the tests |
 | `make lint` | Checks code style |
 | `make format` | Fixes code style |
